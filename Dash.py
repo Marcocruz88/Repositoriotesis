@@ -5,7 +5,6 @@ import numpy as np
 import json
 from xgboost import XGBClassifier
 
-
 # Cargar datos
 Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base analisis exploratorio.csv"
 df = pd.read_csv(Filepath)
@@ -21,6 +20,7 @@ modelo.load_model('modelo_final_entrenado.json')
 
 # Inicializar app
 app = Dash(__name__, external_stylesheets=[dbc.themes.SOLAR], suppress_callback_exceptions=True)
+
 
 # Layout principal
 app.layout = dbc.Container([
@@ -75,7 +75,7 @@ app.layout = dbc.Container([
 
                 html.Br(),
                 html.Label("Código de Categoría Principal:"),
-                dcc.Dropdown(id="codigo_categoria", options=[{"label": i, "value": i} for i in df['codigo de categoria principal'].dropna().unique()]),
+                dcc.Dropdown(id="codigo_categoria", options=[{"label": i, "value": i} for i in sorted(df['codigo de categoria principal'].dropna().unique())]),
 
                 html.Br(),
                 html.Label("Tipo de Contrato:"),
@@ -124,7 +124,7 @@ app.layout = dbc.Container([
 
                 html.Br(),
                 html.Label("Año BPIN:"),
-                dcc.Dropdown(id="anno_bpin", options=[{"label": i, "value": i} for i in df['anno bpin'].dropna().unique()]),
+                dcc.Dropdown(id="anno_bpin", options=[{"label": i, "value": i} for i in sorted(df['anno bpin'].dropna().unique())]),
 
                 html.Br(),
                 html.Label("¿Contrato Prorrogable?"),
@@ -179,7 +179,7 @@ app.layout = dbc.Container([
         ]),
 
         dbc.Row([
-            dbc.Col(html.H1(id="resultado-prediccion", className="display-3 text-center"), width=12)
+            dbc.Col(html.Div(id="resultado-prediccion"), width=12)
         ]),
     ], style={"display": "none"})
 ], fluid=True)
@@ -295,7 +295,7 @@ def predecir(n_clicks, *inputs):
 
     # Validar que no haya campos vacíos
     if any(v is None or v == '' for v in datos_dict.values()):
-        return "⚠️ Por favor completa todos los campos."
+        return dbc.Alert("⚠️ Por favor completa todos los campos.", color="warning")
 
     # Limpiar valores numéricos (quitar comas)
     for key in ["valor_contrato", "valor_pendiente", "precio_base", "tiempo_duracion", "duracion_proceso"]:
@@ -306,23 +306,35 @@ def predecir(n_clicks, *inputs):
 
     # Aplicar get_dummies
     df_input_dummies = pd.get_dummies(df_input)
-
-    # Reindexar estrictamente a las columnas del modelo
     df_input_dummies = df_input_dummies.reindex(columns=columnas_modelo, fill_value=0)
-
-    # Asegurar orden correcto
     df_input_dummies = df_input_dummies[columnas_modelo]
 
     # Predecir
     X_pred = df_input_dummies.values
-    prediccion = modelo.predict(X_pred)
-    prediccion_final = int(prediccion[0])
+    prediccion_final = int(modelo.predict(X_pred)[0])
 
+    # Configurar la respuesta visual
     if prediccion_final == 1:
-        return "❌ El modelo predice que SÍ habrá adición (1)."
+        color_card = "danger"
+        icono = "❌"
+        titulo = "Riesgo de Adición Detectado"
+        mensaje = "Alto riesgo de adición presupuestal.\nRecomendamos revisión detallada del contrato."
     else:
-        return "✅ El modelo predice que NO habrá adición (0)."
+        color_card = "success"
+        icono = "✅"
+        titulo = "Sin Riesgo de Adición"
+        mensaje = "No se espera adición al contrato.\nBajo riesgo de cambios presupuestales."
 
+    return dbc.Card(
+        dbc.CardBody([
+            html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
+            html.H2(titulo, className=f"text-{color_card} text-center"),
+            html.P(mensaje, className="text-center")
+        ]),
+        color=color_card,
+        inverse=True,
+        className="mt-4"
+    )
 # Correr app
 if __name__ == "__main__":
     app.run_server(debug=True, use_reloader=False)
