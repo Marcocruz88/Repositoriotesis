@@ -6,6 +6,10 @@ import json
 import base64
 import io
 from xgboost import XGBClassifier
+import plotly.graph_objects as go
+from dash.exceptions import PreventUpdate
+
+
 
 # Cargar datos
 Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base analisis exploratorio.csv"
@@ -43,6 +47,19 @@ app.layout = dbc.Container([
 
     html.Div(id="tab1-content", children=[
         html.Br(),
+        html.Div(
+        dbc.Alert(
+            html.Span([
+                "Por favor, rellena todos los campos con la información completa del contrato para obtener una predicción precisa.",
+                html.Br(),
+                "Posteriormente diríjase a la pestaña de resultados."
+            ]),
+            color="info",
+            dismissable=True,
+            className="text-center"
+        )
+        
+        ),
         dbc.Row([
             dbc.Col([
                 html.Label("Nombre Entidad:"),
@@ -181,8 +198,7 @@ app.layout = dbc.Container([
                 html.Label("Porcentaje Pagado:"),
                 dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in df['porcentaje_pagado'].dropna().unique()]),
 
-                html.Br(),
-                dbc.Button("Predecir", id="boton-predecir", color="primary", className="mt-3"),
+                
             ], width=6)
         ])
     ], style={"display": "block"}),
@@ -190,32 +206,64 @@ app.layout = dbc.Container([
     html.Div(id="tab2-content", children=[
         html.Br(),
         dbc.Row([
-            dbc.Col(html.H3("Resultado de la Predicción:", className="text-light mb-7 text-center"), width=12)
+            dbc.Col(html.H3("Resultado de la Predicción:", className="text-light mb-4 text-center"), width=12)
         ]),
+        
+        dbc.Row([
+            dbc.Col(
+                dbc.Button("🔍 Predecir", id="boton-predecir", color="warning", size="lg", className="px-4"),
+                width="auto", className="mx-auto text-center"
+            )
+        ], justify="center", className="mb-3"),
 
         dbc.Row([
-            dbc.Col(html.Div(id="resultado-prediccion"), width=12)
+            dbc.Col(
+                html.Div(id="resultado-prediccion", children=[
+                    dbc.Alert("ℹ️ Aún no se ha realizado ninguna predicción. Completa todos los campos en la pestaña de entrada y haz clic en 'Predecir'.", 
+                            id="mensaje-inicial", color="info", className="text-center")
+                ]), 
+                width=12
+            )
         ]),
     ], style={"display": "none"}),
 
     html.Div(id="tab3-content", children=[
-        html.Br(),
-        dbc.Row([
-            dbc.Col([
-                dcc.Upload(
-                    id='upload-data',
-                    children=html.Div(['Arrastra o haz click para cargar el archivo .xlsx']),
-                    style={
-                        'width': '100%', 'height': '60px', 'lineHeight': '60px',
-                        'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                        'textAlign': 'center', 'margin': '10px'
-                    },
-                    multiple=False
-                ),
-                html.Div(id='output-table')
-            ])
+    html.Br(),
+
+    html.Div([
+        dbc.Alert(
+            "Por favor, adjunte los datos de los contratos a predecir en un archivo .xlsx con la primera fila con el nombre de la variable.",
+            id="mensaje-carga",
+            color="info",
+            className="text-center",
+            is_open=True
+        ),
+        dbc.Alert(
+            "✅ Archivo cargado correctamente.",
+            id="mensaje-exito",
+            color="success",
+            className="text-center",
+            is_open=False,
+            dismissable=True
+        ),
+    ]),
+
+    dbc.Row([
+        dbc.Col([
+            dcc.Upload(
+                id='upload-data',
+                children=html.Div(['Arrastra o haz click para cargar el archivo .xlsx']),
+                style={
+                    'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                    'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
+                    'textAlign': 'center', 'margin': '10px'
+                },
+                multiple=False
+            ),
+            html.Div(id='output-table')
         ])
-    ], style={"display": "none"})
+    ])
+], style={"display": "none"})
 ], fluid=True)
 
 # Alternar pestañas
@@ -316,6 +364,7 @@ def actualizar_duracion_proceso(value):
 )
 def predecir(n_clicks, *inputs):
     if not n_clicks:
+        raise PreventUpdate
         return ""
 
     nombres_inputs = [
@@ -341,8 +390,30 @@ def predecir(n_clicks, *inputs):
 
     X_pred = df_input_dummies.values
     probs = modelo.predict_proba(X_pred)[:, 1]
-    prediccion_final = int(modelo.predict(X_pred)[0])
     probabilidad = round(probs[0], 3)
+    prediccion_final = 1 if probabilidad >= 0.75 else 0
+
+    # Crear gráfico tipo gauge
+    gauge_fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=probabilidad * 100,
+        title={'text': "Probabilidad de Adición (%)"},
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "black"},
+            'steps': [
+                {'range': [0, 25], 'color': '#d4edda'},  # Verde claro
+                {'range': [25, 50], 'color': '#fff3cd'}, # Amarillo claro
+                {'range': [50, 75], 'color': '#ffeeba'}, # Naranja claro
+                {'range': [75, 100], 'color': '#f8d7da'} # Rojo claro
+            ],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': probabilidad * 100
+            }
+        }
+    ))
 
     if prediccion_final == 1:
         color_card = "danger"
@@ -356,39 +427,35 @@ def predecir(n_clicks, *inputs):
         mensaje = "No se espera adición al contrato.\nBajo riesgo de cambios presupuestales."
 
     return dbc.Card(
-        dbc.CardBody([
-            html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
-            html.H2(titulo, className=f"text-{color_card} text-center"),
-            html.P(mensaje, className="text-center", style={"fontSize": "18px"}),
-            html.Br(),
-            html.Div([
-                html.Span("Probabilidad estimada de adición: ", style={"fontWeight": "bold"}),
-                html.Span(f"{probabilidad:.3f}", style={
-                    "color": "#721c24" if color_card == "danger" else "#155724",
-                    "fontWeight": "bold"
-                })
-            ], className="text-center")
-        ]),
-        color=color_card,
-        inverse=True,
-        className="mt-4"
-    )
+    dbc.CardBody([
+        html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
+        html.H2(titulo, className=f"text-{color_card} text-center"),
+        html.P(mensaje, className="text-center"),
+        html.H4(f"Probabilidad estimada de adición: {probabilidad:.3f}", className=f"text-{color_card} text-center mt-4"),
+        dcc.Graph(figure=gauge_fig)
+    ]),
+    color=color_card,
+    inverse=True,
+    className="mt-4"
+)
 
 @app.callback(
-    Output('output-table', 'children'),
+    [Output('output-table', 'children'),
+     Output('mensaje-carga', 'is_open'),
+     Output('mensaje-exito', 'is_open')],
     Input('upload-data', 'contents'),
     State('upload-data', 'filename')
 )
 def procesar_archivo(contents, filename):
     if contents is None:
-        return None
+        return None, True, False  # Mostrar mensaje inicial, ocultar éxito
 
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     df = pd.read_excel(io.BytesIO(decoded))
 
     if df.empty:
-        return dbc.Alert("El archivo está vacío o no tiene columnas.", color="warning")
+        return dbc.Alert("El archivo está vacío o no tiene columnas.", color="warning"), False, False
 
     try:
         df_numeric = df.copy()
@@ -404,31 +471,33 @@ def procesar_archivo(contents, filename):
 
         df_resultado = df.copy()
         df_resultado['Probabilidad de Adición'] = np.round(probs, 3)
-        df_resultado['Predicción'] = preds
+        df_resultado['Predicción'] = np.where(preds == 1, "Sí", "No")
 
-        # Construir tabla manual con estilo condicional
+        # Aquí puedes usar tu lógica para crear la tabla estilizada
         header = [html.Th(col) for col in df_resultado.columns]
         rows = []
-
         for i in range(len(df_resultado)):
             fila = []
             for col in df_resultado.columns:
                 valor = df_resultado.iloc[i][col]
                 if col == "Predicción":
-                    texto = "Sí" if valor == 1 else "No"
-                    color = "#f8d7da" if valor == 1 else "#d4edda"
+                    texto = "Sí" if valor == "Sí" else "No"
+                    color = "#f8d7da" if texto == "Sí" else "#d4edda"
                     fila.append(html.Td(texto, style={"backgroundColor": color, "textAlign": "center"}))
                 else:
                     fila.append(html.Td(str(valor)))
             rows.append(html.Tr(fila))
 
-        return dbc.Table(
+        tabla = dbc.Table(
             [html.Thead(html.Tr(header))] + [html.Tbody(rows)],
             striped=True, bordered=True, hover=True, responsive=True
         )
 
+        return tabla, False, True
+
     except Exception as e:
-        return dbc.Alert(f"Error procesando el archivo: {e}", color="danger")
+        return dbc.Alert(f"Error procesando el archivo: {e}", color="danger"), False, False
+
 # Correr app
 if __name__ == "__main__":
     app.run_server(debug=True, use_reloader=False)
