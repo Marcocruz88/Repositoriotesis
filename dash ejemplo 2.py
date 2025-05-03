@@ -35,7 +35,7 @@ app.layout = dbc.Container([
             dcc.Tabs(id="tabs", value="tab1", children=[
     dcc.Tab(label="Entrada de Datos", value="tab1"),
     dcc.Tab(label="Resultados", value="tab2"),
-    dcc.Tab(label="Carga Masiva", value="tab3")  # <-- ESTA LÍNEA FALTABA
+    dcc.Tab(label="Revisión Excel", value="tab3")  
 ]),
             width=12
         )
@@ -317,27 +317,21 @@ def predecir(n_clicks, *inputs):
 
     datos_dict = dict(zip(nombres_inputs, inputs))
 
-    # Validar que no haya campos vacíos
     if any(v is None or v == '' for v in datos_dict.values()):
         return dbc.Alert("⚠️ Por favor completa todos los campos.", color="warning")
 
-    # Limpiar valores numéricos (quitar comas)
     for key in ["valor_contrato", "valor_pendiente", "precio_base", "tiempo_duracion", "duracion_proceso"]:
         datos_dict[key] = float(str(datos_dict[key]).replace(",", ""))
 
-    # Crear DataFrame
     df_input = pd.DataFrame([datos_dict])
-
-    # Aplicar get_dummies
     df_input_dummies = pd.get_dummies(df_input)
     df_input_dummies = df_input_dummies.reindex(columns=columnas_modelo, fill_value=0)
-    df_input_dummies = df_input_dummies[columnas_modelo]
 
-    # Predecir
     X_pred = df_input_dummies.values
+    probs = modelo.predict_proba(X_pred)[:, 1]
     prediccion_final = int(modelo.predict(X_pred)[0])
+    probabilidad = round(probs[0], 3)
 
-    # Configurar la respuesta visual
     if prediccion_final == 1:
         color_card = "danger"
         icono = "❌"
@@ -353,7 +347,15 @@ def predecir(n_clicks, *inputs):
         dbc.CardBody([
             html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
             html.H2(titulo, className=f"text-{color_card} text-center"),
-            html.P(mensaje, className="text-center")
+            html.P(mensaje, className="text-center", style={"fontSize": "18px"}),
+            html.Br(),
+            html.Div([
+                html.Span("Probabilidad estimada de adición: ", style={"fontWeight": "bold"}),
+                html.Span(f"{probabilidad:.3f}", style={
+                    "color": "#721c24" if color_card == "danger" else "#155724",
+                    "fontWeight": "bold"
+                })
+            ], className="text-center")
         ]),
         color=color_card,
         inverse=True,
@@ -392,11 +394,29 @@ def procesar_archivo(contents, filename):
         df_resultado['Probabilidad de Adición'] = np.round(probs, 3)
         df_resultado['Predicción'] = preds
 
-        return dbc.Table.from_dataframe(df_resultado, striped=True, bordered=True, hover=True)
+        # Construir tabla manual con estilo condicional
+        header = [html.Th(col) for col in df_resultado.columns]
+        rows = []
+
+        for i in range(len(df_resultado)):
+            fila = []
+            for col in df_resultado.columns:
+                valor = df_resultado.iloc[i][col]
+                if col == "Predicción":
+                    texto = "Sí" if valor == 1 else "No"
+                    color = "#f8d7da" if valor == 1 else "#d4edda"
+                    fila.append(html.Td(texto, style={"backgroundColor": color, "textAlign": "center"}))
+                else:
+                    fila.append(html.Td(str(valor)))
+            rows.append(html.Tr(fila))
+
+        return dbc.Table(
+            [html.Thead(html.Tr(header))] + [html.Tbody(rows)],
+            striped=True, bordered=True, hover=True, responsive=True
+        )
 
     except Exception as e:
         return dbc.Alert(f"Error procesando el archivo: {e}", color="danger")
-
 # Correr app
 if __name__ == "__main__":
     app.run_server(debug=True, use_reloader=False)
