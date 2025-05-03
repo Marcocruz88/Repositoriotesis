@@ -33,9 +33,9 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col(
             dcc.Tabs(id="tabs", value="tab1", children=[
-    dcc.Tab(label="Entrada de Datos", value="tab1"),
-    dcc.Tab(label="Resultados", value="tab2"),
-    dcc.Tab(label="Revisión Excel", value="tab3")  
+    dcc.Tab(label="Entrada de Datos-Caso Individual", value="tab1"),
+    dcc.Tab(label="Resultados-Caso Individual", value="tab2"),
+    dcc.Tab(label="Revisión Excel- Caso Multiple", value="tab3")  
 ]),
             width=12
         )
@@ -104,18 +104,30 @@ app.layout = dbc.Container([
                 html.Label("¿Está Liquidado?"),
                 dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in df['liquidación'].dropna().unique()]),
 
+                
+                
+            ], width=6),
+
+            dbc.Col([
                 html.Br(),
                 html.Label("Origen de los Recursos:"),
                 dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in df['origen de los recursos'].dropna().unique()]),
 
                 html.Br(),
                 html.Label("Destino del Gasto:"),
-                dcc.Dropdown(id="destino_gasto", options=[{"label": i, "value": i} for i in df['destino gasto'].dropna().unique()]),
-            ], width=6),
+                dcc.Dropdown(
+                    id="destino_gasto", 
+                    options=[{"label": i, "value": i} for i in df['destino gasto'].dropna().unique()],
+                    style={"marginBottom": "15px"}
+                ),
 
-            dbc.Col([
                 html.Label("Valor del Contrato:"),
-                dcc.Input(id="valor_contrato", type="text", debounce=True),
+                dcc.Input(
+                    id="valor_contrato", 
+                    type="text", 
+                    debounce=True, 
+                    style={"marginBottom": "15px"}
+                ),
 
                 html.Br(), html.Br(),
                 html.Label("Valor Pendiente de Pago:"),
