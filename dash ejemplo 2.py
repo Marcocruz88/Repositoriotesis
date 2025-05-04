@@ -8,7 +8,7 @@ import io
 from xgboost import XGBClassifier
 import plotly.graph_objects as go
 from dash.exceptions import PreventUpdate
-
+from dash import no_update, callback_context
 
 
 # Cargar datos
@@ -61,6 +61,10 @@ app.layout = dbc.Container([
         
         ),
         dbc.Row([
+            html.Div(
+                dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual", color="secondary", className="mt-4"),
+                className="text-center"
+            ),
             dbc.Col([
                 html.Label("Nombre Entidad:"),
                 dcc.Dropdown(id="nombre_entidad", options=[{"label": i, "value": i} for i in df['nombre entidad'].dropna().unique()]),
@@ -211,8 +215,13 @@ app.layout = dbc.Container([
         
         dbc.Row([
             dbc.Col(
-                dbc.Button("🔍 Predecir", id="boton-predecir", color="warning", size="lg", className="px-4"),
-                width="auto", className="mx-auto text-center"
+                html.Div([
+                    dbc.Button("🔍 Predecir", id="boton-predecir", color="warning", size="lg", className="px-4 mb-2"),
+                    html.Br(),
+                    dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual", color="secondary")
+                ]),
+                width="auto",
+                className="mx-auto text-center"
             )
         ], justify="center", className="mb-3"),
 
@@ -250,6 +259,11 @@ app.layout = dbc.Container([
 
     dbc.Row([
         dbc.Col([
+            html.Div(
+                dbc.Button("🔄 Reiniciar", id="boton-reiniciar-masiva", color="secondary", className="mt-2"),
+                className="text-center"
+            ),
+            html.Div(id='output-table'),
             dcc.Upload(
                 id='upload-data',
                 children=html.Div(['Arrastra o haz click para cargar el archivo .xlsx']),
@@ -259,8 +273,7 @@ app.layout = dbc.Container([
                     'textAlign': 'center', 'margin': '10px'
                 },
                 multiple=False
-            ),
-            html.Div(id='output-table')
+            )
         ])
     ])
 ], style={"display": "none"})
@@ -327,46 +340,61 @@ def actualizar_tiempo_duracion(value):
 def actualizar_duracion_proceso(value):
     return formatear_miles(value)
 
+
 @app.callback(
     Output("resultado-prediccion", "children"),
-    Input("boton-predecir", "n_clicks"),
-    State("nombre_entidad", "value"),
-    State("nit_entidad", "value"),
-    State("departamento", "value"),
-    State("ciudad", "value"),
-    State("orden", "value"),
-    State("rama", "value"),
-    State("entidad_centralizada", "value"),
-    State("estado_contrato", "value"),
-    State("codigo_categoria", "value"),
-    State("tipo_contrato", "value"),
-    State("modalidad_contratacion", "value"),
-    State("justificacion_modalidad", "value"),
-    State("condiciones_entrega", "value"),
-    State("es_pyme", "value"),
-    State("liquidacion", "value"),
-    State("origen_recursos", "value"),
-    State("destino_gasto", "value"),
-    State("valor_contrato", "value"),
-    State("valor_pendiente", "value"),
-    State("estado_bpin", "value"),
-    State("anno_bpin", "value"),
-    State("puede_prorrogar", "value"),
-    State("fase", "value"),
-    State("precio_base", "value"),
-    State("unidad_contratacion", "value"),
-    State("departamento_proveedor", "value"),
-    State("ciudad_proveedor", "value"),
-    State("tiempo_duracion", "value"),
-    State("duracion_proceso", "value"),
-    State("anio_publicacion", "value"),
-    State("porcentaje_pagado", "value")
+    [Input("boton-predecir", "n_clicks"),
+     Input("boton-reiniciar-individual", "n_clicks")],
+    [State("nombre_entidad", "value"),
+     State("nit_entidad", "value"),
+     State("departamento", "value"),
+     State("ciudad", "value"),
+     State("orden", "value"),
+     State("rama", "value"),
+     State("entidad_centralizada", "value"),
+     State("estado_contrato", "value"),
+     State("codigo_categoria", "value"),
+     State("tipo_contrato", "value"),
+     State("modalidad_contratacion", "value"),
+     State("justificacion_modalidad", "value"),
+     State("condiciones_entrega", "value"),
+     State("es_pyme", "value"),
+     State("liquidacion", "value"),
+     State("origen_recursos", "value"),
+     State("destino_gasto", "value"),
+     State("valor_contrato", "value"),
+     State("valor_pendiente", "value"),
+     State("estado_bpin", "value"),
+     State("anno_bpin", "value"),
+     State("puede_prorrogar", "value"),
+     State("fase", "value"),
+     State("precio_base", "value"),
+     State("unidad_contratacion", "value"),
+     State("departamento_proveedor", "value"),
+     State("ciudad_proveedor", "value"),
+     State("tiempo_duracion", "value"),
+     State("duracion_proceso", "value"),
+     State("anio_publicacion", "value"),
+     State("porcentaje_pagado", "value")],
 )
-def predecir(n_clicks, *inputs):
-    if not n_clicks:
-        raise PreventUpdate
-        return ""
 
+def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
+    ctx = callback_context
+    if not ctx.triggered:
+        return no_update
+
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id == "boton-reiniciar-individual":
+        return dbc.Alert(
+            ["ℹ️ Aún no se ha realizado ninguna predicción.",
+             html.Br(),
+             "Completa todos los campos en la pestaña de entrada y haz clic en 'Predecir'."],
+            color="info",
+            className="text-center"
+        )
+
+    # Continuar con la predicción si fue el botón de predecir
     nombres_inputs = [
         "nombre_entidad", "nit_entidad", "departamento", "ciudad", "orden", "rama", "entidad_centralizada",
         "estado_contrato", "codigo_categoria", "tipo_contrato", "modalidad_contratacion", "justificacion_modalidad",
@@ -391,29 +419,7 @@ def predecir(n_clicks, *inputs):
     X_pred = df_input_dummies.values
     probs = modelo.predict_proba(X_pred)[:, 1]
     probabilidad = round(probs[0], 3)
-    prediccion_final = 1 if probabilidad >= 0.75 else 0
-
-    # Crear gráfico tipo gauge
-    gauge_fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=probabilidad * 100,
-        title={'text': "Probabilidad de Adición (%)"},
-        gauge={
-            'axis': {'range': [0, 100]},
-            'bar': {'color': "black"},
-            'steps': [
-                {'range': [0, 25], 'color': '#d4edda'},  # Verde claro
-                {'range': [25, 50], 'color': '#fff3cd'}, # Amarillo claro
-                {'range': [50, 75], 'color': '#ffeeba'}, # Naranja claro
-                {'range': [75, 100], 'color': '#f8d7da'} # Rojo claro
-            ],
-            'threshold': {
-                'line': {'color': "red", 'width': 4},
-                'thickness': 0.75,
-                'value': probabilidad * 100
-            }
-        }
-    ))
+    prediccion_final = int(probabilidad >= 0.75)
 
     if prediccion_final == 1:
         color_card = "danger"
@@ -426,29 +432,63 @@ def predecir(n_clicks, *inputs):
         titulo = "Sin Riesgo de Adición"
         mensaje = "No se espera adición al contrato.\nBajo riesgo de cambios presupuestales."
 
+    # Indicador tipo gauge
+    gauge_fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=probabilidad * 100,
+        title={'text': "Probabilidad de Adición (%)"},
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "black"},
+            'steps': [
+                {'range': [0, 25], 'color': '#d4edda'},
+                {'range': [25, 50], 'color': '#fff3cd'},
+                {'range': [50, 75], 'color': '#ffeeba'},
+                {'range': [75, 100], 'color': '#f8d7da'}
+            ],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': probabilidad * 100
+            }
+        }
+    ))
+
     return dbc.Card(
-    dbc.CardBody([
-        html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
-        html.H2(titulo, className=f"text-{color_card} text-center"),
-        html.P(mensaje, className="text-center"),
-        html.H4(f"Probabilidad estimada de adición: {probabilidad:.3f}", className=f"text-{color_card} text-center mt-4"),
-        dcc.Graph(figure=gauge_fig)
-    ]),
-    color=color_card,
-    inverse=True,
-    className="mt-4"
-)
+        dbc.CardBody([
+            html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
+            html.H2(titulo, className=f"text-{color_card} text-center"),
+            html.P(mensaje, className="text-center"),
+            html.H4(f"Probabilidad estimada de adición: {probabilidad:.3f}", className=f"text-{color_card} text-center mt-4"),
+            dcc.Graph(figure=gauge_fig)
+        ]),
+        color=color_card,
+        inverse=True,
+        className="mt-4"
+    )
 
 @app.callback(
     [Output('output-table', 'children'),
      Output('mensaje-carga', 'is_open'),
      Output('mensaje-exito', 'is_open')],
-    Input('upload-data', 'contents'),
-    State('upload-data', 'filename')
+    [Input('upload-data', 'contents'),
+     Input('boton-reiniciar-masiva', 'n_clicks')],
+    [State('upload-data', 'filename')],
+    prevent_initial_call=True
 )
-def procesar_archivo(contents, filename):
+def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
+    ctx = callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    trigger = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger == 'boton-reiniciar-masiva':
+        return None, True, False
+
+    # Si se activó por carga de archivo
     if contents is None:
-        return None, True, False  # Mostrar mensaje inicial, ocultar éxito
+        return None, True, False
 
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
@@ -473,7 +513,7 @@ def procesar_archivo(contents, filename):
         df_resultado['Probabilidad de Adición'] = np.round(probs, 3)
         df_resultado['Predicción'] = np.where(preds == 1, "Sí", "No")
 
-        # Aquí puedes usar tu lógica para crear la tabla estilizada
+        # Tabla estilizada
         header = [html.Th(col) for col in df_resultado.columns]
         rows = []
         for i in range(len(df_resultado)):
@@ -497,6 +537,7 @@ def procesar_archivo(contents, filename):
 
     except Exception as e:
         return dbc.Alert(f"Error procesando el archivo: {e}", color="danger"), False, False
+
 
 # Correr app
 if __name__ == "__main__":
