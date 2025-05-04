@@ -47,7 +47,6 @@ app.layout = dbc.Container([
 
     html.Div(id="tab1-content", children=[
         html.Br(),
-        html.Div(
         dbc.Alert(
             html.Span([
                 "Por favor, rellena todos los campos con la información completa del contrato para obtener una predicción precisa.",
@@ -55,157 +54,206 @@ app.layout = dbc.Container([
                 "Posteriormente diríjase a la pestaña de resultados."
             ]),
             color="info",
-            dismissable=True,
+            dismissable=False,
             className="text-center"
-        )
-        
         ),
+
+        html.Div(
+            dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual-tab1", color="secondary", className="mt-4"),
+            className="d-flex justify-content-end"
+        ),
+
+        html.Br(),
+
+        # Fila 1
         dbc.Row([
-            html.Div(
-                dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual-tab1", color="secondary", className="mt-4"),
-                className="d-flex justify-content-end"
-            ),
             dbc.Col([
                 html.Label("Nombre Entidad:"),
-                dcc.Dropdown(id="nombre_entidad", options=[{"label": i, "value": i} for i in df['nombre entidad'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("NIT Entidad:"),
-                dcc.Dropdown(id="nit_entidad", options=[{"label": i, "value": i} for i in df['nit entidad'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Departamento:"),
-                dcc.Dropdown(id="departamento", options=[{"label": i, "value": i} for i in df['departamento'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Ciudad:"),
-                dcc.Dropdown(id="ciudad", options=[{"label": i, "value": i} for i in df['ciudad'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Orden:"),
-                dcc.Dropdown(id="orden", options=[{"label": i, "value": i} for i in df['orden'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Rama:"),
-                dcc.Dropdown(id="rama", options=[{"label": i, "value": i} for i in df['rama'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Entidad Centralizada:"),
-                dcc.Dropdown(id="entidad_centralizada", options=[{"label": i, "value": i} for i in df['entidad centralizada'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Estado Contrato:"),
-                dcc.Dropdown(id="estado_contrato", options=[{"label": i, "value": i} for i in df['estado contrato'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Código de Categoría Principal:"),
-                dcc.Dropdown(id="codigo_categoria", options=[{"label": i, "value": i} for i in sorted(df['codigo de categoria principal'].dropna().unique())]),
-
-                html.Br(),
-                html.Label("Tipo de Contrato:"),
-                dcc.Dropdown(id="tipo_contrato", options=[{"label": i, "value": i} for i in df['tipo de contrato'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Modalidad de Contratación:"),
-                dcc.Dropdown(id="modalidad_contratacion", options=[{"label": i, "value": i} for i in df['modalidad de contratacion'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Justificación Modalidad de Contratación:"),
-                dcc.Dropdown(id="justificacion_modalidad", options=[{"label": i, "value": i} for i in df['justificacion modalidad de contratacion'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Condiciones de Entrega:"),
-                dcc.Dropdown(id="condiciones_entrega", options=[{"label": i, "value": i} for i in df['condiciones de entrega'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("¿Es Pyme?"),
-                dcc.Dropdown(id="es_pyme", options=[{"label": i, "value": i} for i in df['es pyme'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("¿Está Liquidado?"),
-                dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in df['liquidación'].dropna().unique()]),
-
-                
-                
+                dcc.Dropdown(id="nombre_entidad", options=[{"label": i, "value": i} for i in df['nombre entidad'].dropna().unique()])
             ], width=6),
-
             dbc.Col([
-                html.Br(),
                 html.Label("Origen de los Recursos:"),
-                dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in df['origen de los recursos'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Destino del Gasto:"),
-                dcc.Dropdown(
-                    id="destino_gasto", 
-                    options=[{"label": i, "value": i} for i in df['destino gasto'].dropna().unique()],
-                    style={"marginBottom": "15px"}
-                ),
-
-                html.Label("Valor del Contrato:"),
-                dcc.Input(
-                    id="valor_contrato", 
-                    type="text", 
-                    debounce=True, 
-                    style={"marginBottom": "15px"}
-                ),
-
-                html.Br(), html.Br(),
-                html.Label("Valor Pendiente de Pago:"),
-                dcc.Input(id="valor_pendiente", type="text", debounce=True),
-
-                html.Br(), html.Br(),
-                html.Label("Estado BPIN:"),
-                dcc.Dropdown(id="estado_bpin", options=[{"label": i, "value": i} for i in df['estado bpin'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Año BPIN:"),
-                dcc.Dropdown(id="anno_bpin", options=[{"label": i, "value": i} for i in sorted(df['anno bpin'].dropna().unique())]),
-
-                html.Br(),
-                html.Label("¿Contrato Prorrogable?"),
-                dcc.Dropdown(id="puede_prorrogar", options=[{"label": i, "value": i} for i in df['el contrato puede ser prorrogado'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Fase:"),
-                dcc.Dropdown(id="fase", options=[{"label": i, "value": i} for i in df['fase'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Precio Base:"),
-                dcc.Input(id="precio_base", type="text", debounce=True),
-
-                html.Br(), html.Br(),
-                html.Label("Unidad de Contratación:"),
-                dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in df['nombre de la unidad de contratación'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Departamento Proveedor:"),
-                dcc.Dropdown(id="departamento_proveedor", options=[{"label": i, "value": i} for i in df['departamento proveedor'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Ciudad Proveedor:"),
-                dcc.Dropdown(id="ciudad_proveedor", options=[{"label": i, "value": i} for i in df['ciudad proveedor'].dropna().unique()]),
-
-                html.Br(),
-                html.Label("Tiempo de Duración (días):"),
-                dcc.Input(id="tiempo_duracion", type="text", debounce=True),
-
-                html.Br(), html.Br(),
-                html.Label("Duración del Proceso (días):"),
-                dcc.Input(id="duracion_proceso", type="text", debounce=True),
-
-                html.Br(), html.Br(),
-                html.Label("Año de Publicación:"),
-                dcc.Dropdown(id="anio_publicacion", options=[{"label": i, "value": i} for i in sorted(df['año_publicacion'].dropna().unique())]),
-
-                html.Br(),
-                html.Label("Porcentaje Pagado:"),
-                dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in df['porcentaje_pagado'].dropna().unique()]),
-
-                
+                dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in df['origen de los recursos'].dropna().unique()])
             ], width=6)
-        ])
-    ], style={"display": "block"}),
+        ], className="mb-2"),
+
+        # Fila 2
+        dbc.Row([
+            dbc.Col([
+                html.Label("NIT Entidad:"),
+                dcc.Dropdown(id="nit_entidad", options=[{"label": i, "value": i} for i in df['nit entidad'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Destino del Gasto:"),
+                dcc.Dropdown(id="destino_gasto", options=[{"label": i, "value": i} for i in df['destino gasto'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 3
+        dbc.Row([
+            dbc.Col([
+                html.Label("Departamento:"),
+                dcc.Dropdown(id="departamento", options=[{"label": i, "value": i} for i in df['departamento'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Valor del Contrato:"),
+                dcc.Input(id="valor_contrato", type="text", debounce=True, style={"width": "100%"})
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 4
+        dbc.Row([
+            dbc.Col([
+                html.Label("Ciudad:"),
+                dcc.Dropdown(id="ciudad", options=[{"label": i, "value": i} for i in df['ciudad'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Valor Pendiente de Pago:"),
+                dcc.Input(id="valor_pendiente", type="text", debounce=True, style={"width": "100%"})
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 5
+        dbc.Row([
+            dbc.Col([
+                html.Label("Orden:"),
+                dcc.Dropdown(id="orden", options=[{"label": i, "value": i} for i in df['orden'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Estado BPIN:"),
+                dcc.Dropdown(id="estado_bpin", options=[{"label": i, "value": i} for i in df['estado bpin'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 6
+        dbc.Row([
+            dbc.Col([
+                html.Label("Rama:"),
+                dcc.Dropdown(id="rama", options=[{"label": i, "value": i} for i in df['rama'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Año BPIN:"),
+                dcc.Dropdown(id="anno_bpin", options=[{"label": i, "value": i} for i in sorted(df['anno bpin'].dropna().unique())])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 7
+        dbc.Row([
+            dbc.Col([
+                html.Label("Entidad Centralizada:"),
+                dcc.Dropdown(id="entidad_centralizada", options=[{"label": i, "value": i} for i in df['entidad centralizada'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("¿Contrato Prorrogable?"),
+                dcc.Dropdown(id="puede_prorrogar", options=[{"label": i, "value": i} for i in df['el contrato puede ser prorrogado'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 8
+        dbc.Row([
+            dbc.Col([
+                html.Label("Estado Contrato:"),
+                dcc.Dropdown(id="estado_contrato", options=[{"label": i, "value": i} for i in df['estado contrato'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Fase:"),
+                dcc.Dropdown(id="fase", options=[{"label": i, "value": i} for i in df['fase'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 9
+        dbc.Row([
+            dbc.Col([
+                html.Label("Código de Categoría Principal:"),
+                dcc.Dropdown(id="codigo_categoria", options=[{"label": i, "value": i} for i in sorted(df['codigo de categoria principal'].dropna().unique())])
+            ], width=6),
+            dbc.Col([
+                html.Label("Precio Base:"),
+                dcc.Input(id="precio_base", type="text", debounce=True, style={"width": "100%"})
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 10
+        dbc.Row([
+            dbc.Col([
+                html.Label("Tipo de Contrato:"),
+                dcc.Dropdown(id="tipo_contrato", options=[{"label": i, "value": i} for i in df['tipo de contrato'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Unidad de Contratación:"),
+                dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in df['nombre de la unidad de contratación'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 11
+        dbc.Row([
+            dbc.Col([
+                html.Label("Modalidad de Contratación:"),
+                dcc.Dropdown(id="modalidad_contratacion", options=[{"label": i, "value": i} for i in df['modalidad de contratacion'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Departamento Proveedor:"),
+                dcc.Dropdown(id="departamento_proveedor", options=[{"label": i, "value": i} for i in df['departamento proveedor'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 12
+        dbc.Row([
+            dbc.Col([
+                html.Label("Justificación Modalidad de Contratación:"),
+                dcc.Dropdown(id="justificacion_modalidad", options=[{"label": i, "value": i} for i in df['justificacion modalidad de contratacion'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Ciudad Proveedor:"),
+                dcc.Dropdown(id="ciudad_proveedor", options=[{"label": i, "value": i} for i in df['ciudad proveedor'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 13
+        dbc.Row([
+            dbc.Col([
+                html.Label("Condiciones de Entrega:"),
+                dcc.Dropdown(id="condiciones_entrega", options=[{"label": i, "value": i} for i in df['condiciones de entrega'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Tiempo de Duración (días):"),
+                dcc.Input(id="tiempo_duracion", type="text", debounce=True, style={"width": "100%"})
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 14
+        dbc.Row([
+            dbc.Col([
+                html.Label("¿Es Pyme?"),
+                dcc.Dropdown(id="es_pyme", options=[{"label": i, "value": i} for i in df['es pyme'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Duración del Proceso (días):"),
+                dcc.Input(id="duracion_proceso", type="text", debounce=True, style={"width": "100%"})
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 15
+        dbc.Row([
+            dbc.Col([
+                html.Label("¿Está Liquidado?"),
+                dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in df['liquidación'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
+                html.Label("Año de Publicación:"),
+                dcc.Dropdown(id="anio_publicacion", options=[{"label": i, "value": i} for i in sorted(df['año_publicacion'].dropna().unique())])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 16
+        dbc.Row([
+            dbc.Col([
+                html.Label("Porcentaje Pagado:"),
+                dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in df['porcentaje_pagado'].dropna().unique()])
+            ], width=6)
+        ], className="mb-2")
+
+    ]),
 
     html.Div(id="tab2-content", children=[
         html.Br(),
@@ -217,13 +265,21 @@ app.layout = dbc.Container([
             dbc.Col(
                 html.Div([
                     dbc.Button("🔍 Predecir", id="boton-predecir", color="warning", size="lg", className="px-4 mb-2"),
-                    html.Br(),
-                    dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual", color="secondary")
-                ]),
+                ], className="text-center"),
                 width="auto",
-                className="mx-auto text-center"
+                className="mx-auto"
             )
-        ], justify="center", className="mb-3"),
+        ]),
+
+        dbc.Row([
+            dbc.Col(
+                html.Div(
+                    dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual", color="secondary"),
+                    className="d-flex justify-content-end"
+                ),
+                width=12
+            )
+        ], className="mb-3"),
 
         dbc.Row([
             dbc.Col(
@@ -261,16 +317,17 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Div(
                 dbc.Button("🔄 Reiniciar", id="boton-reiniciar-masiva", color="secondary", className="mt-2"),
-                className="text-center"
+                className="d-flex justify-content-end"
             ),
             html.Div(id='output-table'),
             dcc.Upload(
                 id='upload-data',
-                children=html.Div(['Arrastra o haz click para cargar el archivo .xlsx']),
+                children=html.Div(['Arrastra o haz click para cargar el archivo .xlsx'],style={"color": "#ffffff", "fontWeight": "bold"}),
+                
                 style={
                     'width': '100%', 'height': '60px', 'lineHeight': '60px',
                     'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                    'textAlign': 'center', 'margin': '10px'
+                    'textAlign': 'center', 'margin': '10px','backgroundColor': '#154360'
                 },
                 multiple=False
             )
