@@ -12,17 +12,18 @@ from dash import no_update, callback_context
 
 
 # Cargar datos
-Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base analisis exploratorio.csv"
+Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base analisis exploratorio sinnombre.csv"
 df = pd.read_csv(Filepath)
 
+
 # Cargar columnas del modelo
-columns_filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/muestra dummies.csv"
+columns_filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/muestra dummies2.csv"
 df_columns = pd.read_csv(columns_filepath)
 columnas_modelo = df_columns.columns.tolist()
 
 # Cargar modelo
 modelo = XGBClassifier()
-modelo.load_model('modelo_final_entrenado.json')
+modelo.load_model('modelo_final_entrenado2.json')
 
 # Inicializar app
 app = Dash(__name__, external_stylesheets=[dbc.themes.SOLAR], suppress_callback_exceptions=True)
@@ -65,18 +66,6 @@ app.layout = dbc.Container([
 
         html.Br(),
 
-        # Fila 1
-        dbc.Row([
-            dbc.Col([
-                html.Label("Nombre Entidad:"),
-                dcc.Dropdown(id="nombre_entidad", options=[{"label": i, "value": i} for i in df['nombre entidad'].dropna().unique()])
-            ], width=6),
-            dbc.Col([
-                html.Label("Origen de los Recursos:"),
-                dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in df['origen de los recursos'].dropna().unique()])
-            ], width=6)
-        ], className="mb-2"),
-
         # Fila 2
         dbc.Row([
             dbc.Col([
@@ -97,7 +86,7 @@ app.layout = dbc.Container([
             ], width=6),
             dbc.Col([
                 html.Label("Valor del Contrato:"),
-                dcc.Input(id="valor_contrato", type="text", debounce=True, style={"width": "100%"})
+                dcc.Input(id="valor_contrato", type="number", debounce=True, style={"width": "100%"})
             ], width=6)
         ], className="mb-2"),
 
@@ -248,6 +237,10 @@ app.layout = dbc.Container([
         # Fila 16
         dbc.Row([
             dbc.Col([
+                html.Label("Origen de los Recursos:"),
+                dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in df['origen de los recursos'].dropna().unique()])
+            ], width=6),
+            dbc.Col([
                 html.Label("Porcentaje Pagado:"),
                 dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in df['porcentaje_pagado'].dropna().unique()])
             ], width=6)
@@ -361,39 +354,12 @@ def formatear_miles(value):
     except:
         return value
 
-# Callback para formatear campos numéricos o reiniciarlos si se presiona el botón
-@app.callback(
-    [Output("valor_contrato", "value"),
-     Output("valor_pendiente", "value"),
-     Output("precio_base", "value"),
-     Output("tiempo_duracion", "value"),
-     Output("duracion_proceso", "value")],
-    [Input("valor_contrato", "value"),
-     Input("valor_pendiente", "value"),
-     Input("precio_base", "value"),
-     Input("tiempo_duracion", "value"),
-     Input("duracion_proceso", "value"),
-     Input("boton-reiniciar-individual-tab1", "n_clicks")],
-    prevent_initial_call=True
-)
-def formatear_o_reiniciar(vc, vp, pb, td, dp, n_reiniciar):
-    ctx = callback_context
-    if not ctx.triggered:
-        raise PreventUpdate
 
-    trigger = ctx.triggered[0]['prop_id'].split('.')[0]
-
-    if trigger == "boton-reiniciar-individual-tab1":
-        return [""] * 5
-
-    valores = [vc, vp, pb, td, dp]
-    return [formatear_miles(v) for v in valores]
 
 
 # Callback para reiniciar todos los campos tipo Dropdown/Input en la pestaña de entrada individual (excepto los numéricos)
 @app.callback(
-    [Output("nombre_entidad", "value"),
-     Output("nit_entidad", "value"),
+    [Output("nit_entidad", "value"),
      Output("departamento", "value"),
      Output("ciudad", "value"),
      Output("orden", "value"),
@@ -422,15 +388,14 @@ def formatear_o_reiniciar(vc, vp, pb, td, dp, n_reiniciar):
     prevent_initial_call=True
 )
 def reiniciar_dropdowns(n_clicks):
-    return [None] * 26
+    return [None] * 25
 
 # Callback para ejecutar la predicción individual y mostrar mensaje de reinicio en la pestaña de resultados
 @app.callback(
     Output("resultado-prediccion", "children"),
     [Input("boton-predecir", "n_clicks"),
      Input("boton-reiniciar-individual", "n_clicks")],
-    [State("nombre_entidad", "value"),
-     State("nit_entidad", "value"),
+    [State("nit_entidad", "value"),
      State("departamento", "value"),
      State("ciudad", "value"),
      State("orden", "value"),
@@ -478,9 +443,9 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
             className="text-center"
         )
 
-    # Continuar con la predicción si fue el botón de predecir
+    # Lista de campos esperados
     nombres_inputs = [
-        "nombre_entidad", "nit_entidad", "departamento", "ciudad", "orden", "rama", "entidad_centralizada",
+        "nit_entidad", "departamento", "ciudad", "orden", "rama", "entidad_centralizada",
         "estado_contrato", "codigo_categoria", "tipo_contrato", "modalidad_contratacion", "justificacion_modalidad",
         "condiciones_entrega", "es_pyme", "liquidacion", "origen_recursos", "destino_gasto", "valor_contrato",
         "valor_pendiente", "estado_bpin", "anno_bpin", "puede_prorrogar", "fase", "precio_base",
@@ -490,21 +455,80 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
 
     datos_dict = dict(zip(nombres_inputs, inputs))
 
+    # Validar que no haya campos vacíos
     if any(v is None or v == '' for v in datos_dict.values()):
         return dbc.Alert("⚠️ Por favor completa todos los campos.", color="warning")
 
-    for key in ["valor_contrato", "valor_pendiente", "precio_base", "tiempo_duracion", "duracion_proceso"]:
-        datos_dict[key] = float(str(datos_dict[key]).replace(",", ""))
+    # Función para convertir valores con comas a float
+    def convertir_a_float(valor):
+        if valor is None:
+            return 0.0
+        if isinstance(valor, (int, float)):
+            return float(valor)
+        try:
+            return float(str(valor).replace(",", "").replace(" ", "").strip())
+        except ValueError:
+            return 0.0
 
+    # Convertir campos numéricos a float
+    campos_numericos = ["valor del contrato", "valor pendiente de pago", "precio base", "tiempo duracion (dias)", "duracion_proceso_dias"]
+    
+    # Crear DataFrame base con los datos del usuario
     df_input = pd.DataFrame([datos_dict])
-    df_input_dummies = pd.get_dummies(df_input)
-    df_input_dummies = df_input_dummies.reindex(columns=columnas_modelo, fill_value=0)
 
+   # Limpiar strings en campos no numéricos
+    for col in df_input.columns:
+        if col not in campos_numericos and df_input[col].dtype == object:
+            df_input[col] = df_input[col].astype(str).str.strip().str.title()
+
+    df_input.to_excel("debug_original_individual.xlsx", index=False)
+    # Ahora sí: convertir a dummies
+
+    df_input.rename(columns={
+        "origen_recursos": "origen de los recursos",
+        "destino_gasto": "destino gasto",
+        "estado_contrato": "estado contrato",
+        "codigo_categoria": "codigo de categoria principal",
+        "departamento_proveedor": "departamento proveedor",
+        "ciudad_proveedor": "ciudad proveedor",
+        "fase": "fase",
+        "justificacion_modalidad": "justificacion modalidad de contratacion",
+        "modalidad_contratacion": "modalidad de contratacion",
+        "unidad_contratacion": "nombre de la unidad de contratación",
+        "tipo_contrato": "tipo de contrato"
+    }, inplace=True)
+
+    df_input_dummies = pd.get_dummies(df_input)
+    df_input_dummies.to_excel("apenasdummies.xlsx", index=False)
+
+    # Reindex para que tenga solo las columnas del modelo (asegura orden y consistencia)
+    df_input_dummies = df_input_dummies.reindex(columns=columnas_modelo, fill_value=0)
+    df_input_dummies.to_excel("apenasdummies2.xlsx", index=False)
+
+   # 🔁 Reinsertar valores numéricos reales después del reindex
+    mapa_campos_numericos = {
+        "valor del contrato": "valor_contrato",
+        "valor pendiente de pago": "valor_pendiente",
+        "precio base": "precio_base",
+        "tiempo duracion (dias)": "tiempo_duracion",
+        "duracion_proceso_dias": "duracion_proceso",
+        "año_publicacion": "anio_publicacion"  # ⬅️ este es clave por el tema de la tilde
+    }
+
+    for col_final, col_input in mapa_campos_numericos.items():
+        if col_final in df_input_dummies.columns:
+            df_input_dummies.at[df_input_dummies.index[0], col_final] = datos_dict[col_input]
+        
+    df_input_dummies = df_input_dummies.astype(int)
+    df_input_dummies.to_excel("debug_dummies_individual.xlsx", index=False)
+
+    # Realizar predicción
     X_pred = df_input_dummies.values
     probs = modelo.predict_proba(X_pred)[:, 1]
     probabilidad = round(probs[0], 3)
     prediccion_final = int(probabilidad >= 0.75)
 
+    # Mostrar resultado
     if prediccion_final == 1:
         color_card = "danger"
         icono = "❌"
@@ -516,7 +540,7 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         titulo = "Sin Riesgo de Adición"
         mensaje = "No se espera adición al contrato.\nBajo riesgo de cambios presupuestales."
 
-    # Indicador tipo gauge
+    # Gráfico tipo gauge
     gauge_fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=probabilidad * 100,
@@ -587,8 +611,14 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
         for col in df_numeric.select_dtypes(include=['object']).columns:
             df_numeric[col] = df_numeric[col].astype(str)
 
+        df = df.applymap(lambda x: x.strip().title() if isinstance(x, str) else x)
         df_dummies = pd.get_dummies(df_numeric)
         df_dummies = df_dummies.reindex(columns=columnas_modelo, fill_value=0)
+        df_dummies = df_dummies.astype(int)
+        df_dummies.to_excel("debug_dummies_masivo.xlsx", index=False)
+
+
+
 
         X_pred = df_dummies.values
         probs = modelo.predict_proba(X_pred)[:, 1]
