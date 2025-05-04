@@ -62,8 +62,8 @@ app.layout = dbc.Container([
         ),
         dbc.Row([
             html.Div(
-                dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual", color="secondary", className="mt-4"),
-                className="text-center"
+                dbc.Button("🔄 Reiniciar", id="boton-reiniciar-individual-tab1", color="secondary", className="mt-4"),
+                className="d-flex justify-content-end"
             ),
             dbc.Col([
                 html.Label("Nombre Entidad:"),
@@ -279,7 +279,7 @@ app.layout = dbc.Container([
 ], style={"display": "none"})
 ], fluid=True)
 
-# Alternar pestañas
+# Para alterar entre pestañas
 @app.callback(
     [Output("tab1-content", "style"),
      Output("tab2-content", "style"),
@@ -293,7 +293,7 @@ def alternar_pestanas(tab):
         {"display": "block"} if tab == "tab3" else {"display": "none"}
     ]
 
-# Función para formatear números con comas
+# Función para formatear números con comas 
 def formatear_miles(value):
     if value is None or value == '':
         return ''
@@ -304,43 +304,70 @@ def formatear_miles(value):
     except:
         return value
 
-# Callbacks de formateo
+# Callback para formatear campos numéricos o reiniciarlos si se presiona el botón
 @app.callback(
-    Output("valor_contrato", "value"),
-    Input("valor_contrato", "value")
+    [Output("valor_contrato", "value"),
+     Output("valor_pendiente", "value"),
+     Output("precio_base", "value"),
+     Output("tiempo_duracion", "value"),
+     Output("duracion_proceso", "value")],
+    [Input("valor_contrato", "value"),
+     Input("valor_pendiente", "value"),
+     Input("precio_base", "value"),
+     Input("tiempo_duracion", "value"),
+     Input("duracion_proceso", "value"),
+     Input("boton-reiniciar-individual-tab1", "n_clicks")],
+    prevent_initial_call=True
 )
-def actualizar_valor_contrato(value):
-    return formatear_miles(value)
+def formatear_o_reiniciar(vc, vp, pb, td, dp, n_reiniciar):
+    ctx = callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
 
+    trigger = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger == "boton-reiniciar-individual-tab1":
+        return [""] * 5
+
+    valores = [vc, vp, pb, td, dp]
+    return [formatear_miles(v) for v in valores]
+
+
+# Callback para reiniciar todos los campos tipo Dropdown/Input en la pestaña de entrada individual (excepto los numéricos)
 @app.callback(
-    Output("valor_pendiente", "value"),
-    Input("valor_pendiente", "value")
+    [Output("nombre_entidad", "value"),
+     Output("nit_entidad", "value"),
+     Output("departamento", "value"),
+     Output("ciudad", "value"),
+     Output("orden", "value"),
+     Output("rama", "value"),
+     Output("entidad_centralizada", "value"),
+     Output("estado_contrato", "value"),
+     Output("codigo_categoria", "value"),
+     Output("tipo_contrato", "value"),
+     Output("modalidad_contratacion", "value"),
+     Output("justificacion_modalidad", "value"),
+     Output("condiciones_entrega", "value"),
+     Output("es_pyme", "value"),
+     Output("liquidacion", "value"),
+     Output("origen_recursos", "value"),
+     Output("destino_gasto", "value"),
+     Output("estado_bpin", "value"),
+     Output("anno_bpin", "value"),
+     Output("puede_prorrogar", "value"),
+     Output("fase", "value"),
+     Output("unidad_contratacion", "value"),
+     Output("departamento_proveedor", "value"),
+     Output("ciudad_proveedor", "value"),
+     Output("anio_publicacion", "value"),
+     Output("porcentaje_pagado", "value")],
+    Input("boton-reiniciar-individual-tab1", "n_clicks"),
+    prevent_initial_call=True
 )
-def actualizar_valor_pendiente(value):
-    return formatear_miles(value)
+def reiniciar_dropdowns(n_clicks):
+    return [None] * 26
 
-@app.callback(
-    Output("precio_base", "value"),
-    Input("precio_base", "value")
-)
-def actualizar_precio_base(value):
-    return formatear_miles(value)
-
-@app.callback(
-    Output("tiempo_duracion", "value"),
-    Input("tiempo_duracion", "value")
-)
-def actualizar_tiempo_duracion(value):
-    return formatear_miles(value)
-
-@app.callback(
-    Output("duracion_proceso", "value"),
-    Input("duracion_proceso", "value")
-)
-def actualizar_duracion_proceso(value):
-    return formatear_miles(value)
-
-
+# Callback para ejecutar la predicción individual y mostrar mensaje de reinicio en la pestaña de resultados
 @app.callback(
     Output("resultado-prediccion", "children"),
     [Input("boton-predecir", "n_clicks"),
@@ -467,6 +494,7 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         className="mt-4"
     )
 
+# Callback para cargar archivo Excel en la pestaña de revisión masiva, predecir y mostrar tabla de resultados
 @app.callback(
     [Output('output-table', 'children'),
      Output('mensaje-carga', 'is_open'),
