@@ -13,7 +13,7 @@ from unidecode import unidecode
 
 
 # Cargar datos
-Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base analisis exploratorio sinnombre.csv"
+Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base para dash.csv"
 df = pd.read_csv(Filepath)
 
 df.columns = (
@@ -78,23 +78,23 @@ app.layout = dbc.Container([
 
         html.Br(),
 
-        # Fila 2
+        # Fila 1
         dbc.Row([
             dbc.Col([
                 html.Label("NIT Entidad:"),
-                dcc.Dropdown(id="nit_entidad", options=[{"label": i, "value": i} for i in df['nit entidad'].dropna().unique()])
+                dcc.Dropdown(id="nit_entidad", options=[{"label": i, "value": i} for i in sorted(df['nit entidad'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Destino del Gasto:"),
-                dcc.Dropdown(id="destino_gasto", options=[{"label": i, "value": i} for i in df['destino gasto'].dropna().unique()])
+                dcc.Dropdown(id="destino_gasto", options=[{"label": i, "value": i} for i in sorted(df['destino gasto'].dropna().unique())])
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 3
+        # Fila 2
         dbc.Row([
             dbc.Col([
                 html.Label("Departamento:"),
-                dcc.Dropdown(id="departamento", options=[{"label": i, "value": i} for i in df['departamento'].dropna().unique()])
+                dcc.Dropdown(id="departamento", options=[{"label": i, "value": i} for i in sorted(df['departamento'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Valor del Contrato:"),
@@ -102,11 +102,11 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 4
+        # Fila 3
         dbc.Row([
             dbc.Col([
                 html.Label("Ciudad:"),
-                dcc.Dropdown(id="ciudad", options=[{"label": i, "value": i} for i in df['ciudad'].dropna().unique()])
+                dcc.Dropdown(id="ciudad", options=[{"label": i, "value": i} for i in sorted(df['ciudad'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Valor Pendiente de Pago:"),
@@ -114,23 +114,23 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 5
+        # Fila 4
         dbc.Row([
             dbc.Col([
                 html.Label("Orden:"),
-                dcc.Dropdown(id="orden", options=[{"label": i, "value": i} for i in df['orden'].dropna().unique()])
+                dcc.Dropdown(id="orden", options=[{"label": i, "value": i} for i in sorted(df['orden'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Estado BPIN:"),
-                dcc.Dropdown(id="estado_bpin", options=[{"label": i, "value": i} for i in df['estado bpin'].dropna().unique()])
+                dcc.Dropdown(id="estado_bpin", options=[{"label": i, "value": i} for i in sorted(df['estado bpin'].dropna().unique())])
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 6
+        # Fila 5
         dbc.Row([
             dbc.Col([
                 html.Label("Rama:"),
-                dcc.Dropdown(id="rama", options=[{"label": i, "value": i} for i in df['rama'].dropna().unique()])
+                dcc.Dropdown(id="rama", options=[{"label": i, "value": i} for i in sorted(df['rama'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Año BPIN:"),
@@ -138,31 +138,31 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 7
+        # Fila 6
         dbc.Row([
             dbc.Col([
                 html.Label("Entidad Centralizada:"),
-                dcc.Dropdown(id="entidad_centralizada", options=[{"label": i, "value": i} for i in df['entidad centralizada'].dropna().unique()])
+                dcc.Dropdown(id="entidad_centralizada", options=[{"label": i, "value": i} for i in sorted(df['entidad centralizada'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("¿Contrato Prorrogable?"),
-                dcc.Dropdown(id="puede_prorrogar", options=[{"label": i, "value": i} for i in df['el contrato puede ser prorrogado'].dropna().unique()])
+                dcc.Dropdown(id="puede_prorrogar", options=[{"label": i, "value": i} for i in sorted(df['el contrato puede ser prorrogado'].dropna().unique())])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 7
+        dbc.Row([
+            dbc.Col([
+                html.Label("Estado Contrato:"),
+                dcc.Dropdown(id="estado_contrato", options=[{"label": i, "value": i} for i in sorted(df['estado contrato'].dropna().unique())])
+            ], width=6),
+            dbc.Col([
+                html.Label("Fase:"),
+                dcc.Dropdown(id="fase", options=[{"label": i, "value": i} for i in sorted(df['fase'].dropna().unique())])
             ], width=6)
         ], className="mb-2"),
 
         # Fila 8
-        dbc.Row([
-            dbc.Col([
-                html.Label("Estado Contrato:"),
-                dcc.Dropdown(id="estado_contrato", options=[{"label": i, "value": i} for i in df['estado contrato'].dropna().unique()])
-            ], width=6),
-            dbc.Col([
-                html.Label("Fase:"),
-                dcc.Dropdown(id="fase", options=[{"label": i, "value": i} for i in df['fase'].dropna().unique()])
-            ], width=6)
-        ], className="mb-2"),
-
-        # Fila 9
         dbc.Row([
             dbc.Col([
                 html.Label("Código de Categoría Principal:"),
@@ -174,47 +174,47 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 10
+        # Fila 9
         dbc.Row([
             dbc.Col([
                 html.Label("Tipo de Contrato:"),
-                dcc.Dropdown(id="tipo_contrato", options=[{"label": i, "value": i} for i in df['tipo de contrato'].dropna().unique()])
+                dcc.Dropdown(id="tipo_contrato", options=[{"label": i, "value": i} for i in sorted(df['tipo de contrato'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Unidad de Contratación:"),
-                dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in df['nombre de la unidad de contratacion'].dropna().unique()])
+                dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in sorted(df['nombre de la unidad de contratacion'].dropna().unique())])
+            ], width=6)
+        ], className="mb-2"),
+
+        # Fila 10
+        dbc.Row([
+            dbc.Col([
+                html.Label("Modalidad de Contratación:"),
+                dcc.Dropdown(id="modalidad_contratacion", options=[{"label": i, "value": i} for i in sorted(df['modalidad de contratacion'].dropna().unique())])
+            ], width=6),
+            dbc.Col([
+                html.Label("Departamento Proveedor:"),
+                dcc.Dropdown(id="departamento_proveedor", options=[{"label": i, "value": i} for i in sorted(df['departamento proveedor'].dropna().unique())])
             ], width=6)
         ], className="mb-2"),
 
         # Fila 11
         dbc.Row([
             dbc.Col([
-                html.Label("Modalidad de Contratación:"),
-                dcc.Dropdown(id="modalidad_contratacion", options=[{"label": i, "value": i} for i in df['modalidad de contratacion'].dropna().unique()])
+                html.Label("Justificación Modalidad de Contratación:"),
+                dcc.Dropdown(id="justificacion_modalidad", options=[{"label": i, "value": i} for i in sorted(df['justificacion modalidad de contratacion'].dropna().unique())])
             ], width=6),
             dbc.Col([
-                html.Label("Departamento Proveedor:"),
-                dcc.Dropdown(id="departamento_proveedor", options=[{"label": i, "value": i} for i in df['departamento proveedor'].dropna().unique()])
+                html.Label("Ciudad Proveedor:"),
+                dcc.Dropdown(id="ciudad_proveedor", options=[{"label": i, "value": i} for i in sorted(df['ciudad proveedor'].dropna().unique())])
             ], width=6)
         ], className="mb-2"),
 
         # Fila 12
         dbc.Row([
             dbc.Col([
-                html.Label("Justificación Modalidad de Contratación:"),
-                dcc.Dropdown(id="justificacion_modalidad", options=[{"label": i, "value": i} for i in df['justificacion modalidad de contratacion'].dropna().unique()])
-            ], width=6),
-            dbc.Col([
-                html.Label("Ciudad Proveedor:"),
-                dcc.Dropdown(id="ciudad_proveedor", options=[{"label": i, "value": i} for i in df['ciudad proveedor'].dropna().unique()])
-            ], width=6)
-        ], className="mb-2"),
-
-        # Fila 13
-        dbc.Row([
-            dbc.Col([
                 html.Label("Condiciones de Entrega:"),
-                dcc.Dropdown(id="condiciones_entrega", options=[{"label": i, "value": i} for i in df['condiciones de entrega'].dropna().unique()])
+                dcc.Dropdown(id="condiciones_entrega", options=[{"label": i, "value": i} for i in sorted(df['condiciones de entrega'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Tiempo de Duración (días):"),
@@ -222,11 +222,11 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 14
+        # Fila 13
         dbc.Row([
             dbc.Col([
                 html.Label("¿Es Pyme?"),
-                dcc.Dropdown(id="es_pyme", options=[{"label": i, "value": i} for i in df['es pyme'].dropna().unique()])
+                dcc.Dropdown(id="es_pyme", options=[{"label": i, "value": i} for i in sorted(df['es pyme'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Duración del Proceso (días):"),
@@ -234,11 +234,11 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 15
+        # Fila 14
         dbc.Row([
             dbc.Col([
                 html.Label("¿Está Liquidado?"),
-                dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in df['liquidacion'].dropna().unique()])
+                dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in sorted(df['liquidacion'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Año de Publicación:"),
@@ -246,15 +246,15 @@ app.layout = dbc.Container([
             ], width=6)
         ], className="mb-2"),
 
-        # Fila 16
+        # Fila 15
         dbc.Row([
             dbc.Col([
                 html.Label("Origen de los Recursos:"),
-                dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in df['origen de los recursos'].dropna().unique()])
+                dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in sorted(df['origen de los recursos'].dropna().unique())])
             ], width=6),
             dbc.Col([
                 html.Label("Porcentaje Pagado:"),
-                dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in df['porcentaje_pagado'].dropna().unique()])
+                dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in sorted(df['porcentaje_pagado'].dropna().unique())])
             ], width=6)
         ], className="mb-2")
 
@@ -367,8 +367,6 @@ def formatear_miles(value):
         return value
 
 
-
-
 # Callback para reiniciar todos los campos tipo Dropdown/Input en la pestaña de entrada individual (excepto los numéricos)
 @app.callback(
     [Output("nit_entidad", "value"),
@@ -473,7 +471,6 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
     ]
 
 
-
     datos_dict = dict(zip(nombres_inputs, inputs))
     datos_dict_original = dict(zip(nombres_inputs, inputs))
     # Reemplazar guiones bajos en las claves para que coincidan con columnas originales del modelo
@@ -505,8 +502,6 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         if col not in campos_numericos and df_input[col].dtype == object:
             df_input[col] = df_input[col].astype(str).str.strip().str.title()
 
-    
-    # Ahora sí: convertir a dummies
 
     df_input.rename(columns={
         "origen recursos": "origen de los recursos",
@@ -525,18 +520,13 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         "porcentaje pagado": "porcentaje_pagado"
     }, inplace=True)
 
-
-
     
     df_input_dummies = pd.get_dummies(df_input)
     df_input_dummies.columns = [col.lower() for col in df_input_dummies.columns]
-    
-
-    # Reindex para que tenga solo las columnas del modelo (asegura orden y consistencia)
     df_input_dummies = df_input_dummies.reindex(columns=columnas_modelo, fill_value=0)
     
 
-   # 🔁 Reinsertar valores numéricos reales después del reindex
+   #Reinsertar valores numéricos reales después del reindex
     mapa_campos_numericos = {
         "valor del contrato": "valor_contrato",
         "valor pendiente de pago": "valor_pendiente",
@@ -595,14 +585,14 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
 
     return dbc.Card(
         dbc.CardBody([
-            html.H1(icono, className=f"text-{color_card} text-center", style={"fontSize": "90px"}),
-            html.H2(titulo, className=f"text-{color_card} text-center"),
+            html.H1(icono, className="text-center", style={"fontSize": "90px"}),
+            html.H2(titulo, className="text-center"),
             html.P(mensaje, className="text-center"),
-            html.H4(f"Probabilidad estimada de adición: {probabilidad:.3f}", className=f"text-{color_card} text-center mt-4"),
+            html.H4(f"Probabilidad estimada de adición: {probabilidad * 100:.1f}%", className="text-center mt-4"),
             dcc.Graph(figure=gauge_fig)
         ]),
         color=color_card,
-        inverse=True,
+        inverse=True, 
         className="mt-4"
     )
 
@@ -626,7 +616,6 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
     if trigger == 'boton-reiniciar-masiva':
         return None, True, False
 
-    # Si se activó por carga de archivo
     if contents is None:
         return None, True, False
 
@@ -643,7 +632,6 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
         df.columns = [unidecode(col) for col in df.columns]  
         df = df.applymap(lambda x: unidecode(x.lower().strip()) if isinstance(x, str) else x)
 
-        #df = df.applymap(lambda x: x.lower().strip() if isinstance(x, str) else x)
         df_numeric = df.copy()
         for col in df_numeric.select_dtypes(include=['object']).columns:
             df_numeric[col] = df_numeric[col].astype(str)
@@ -653,14 +641,9 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
 
         df_dummies = pd.get_dummies(df_numeric)
         df_dummies.columns = df_dummies.columns.str.lower().str.strip()
-        
-
         df_dummies = df_dummies.reindex(columns=columnas_modelo, fill_value=0)
         df_dummies = df_dummies.astype(int)
     
-
-
-
 
         X_pred = df_dummies.values
         probs = modelo.predict_proba(X_pred)[:, 1]
@@ -678,9 +661,21 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
             for col in df_resultado.columns:
                 valor = df_resultado.iloc[i][col]
                 if col == "Predicción":
-                    texto = "Sí" if valor == "Sí" else "No"
-                    color = "#f8d7da" if texto == "Sí" else "#d4edda"
-                    fila.append(html.Td(texto, style={"backgroundColor": color, "textAlign": "center"}))
+                    es_adicion = valor == "Sí"
+                    icono = "❌" if es_adicion else "✅"
+                    texto = "Adición" if es_adicion else "No Adición"
+                    color = "#f8d7da" if es_adicion else "#d4edda"
+
+                    fila.append(html.Td(
+                        html.Div([
+                            html.Div(icono, style={"fontSize": "26px", "fontWeight": "bold"}),
+                            html.Div(texto, style={"fontSize": "15px", "color": "black"})
+                        ], style={"textAlign": "center"}),
+                        style={
+                            "backgroundColor": color,
+                            "verticalAlign": "middle"
+                        }
+                    ))
                 else:
                     fila.append(html.Td(str(valor)))
             rows.append(html.Tr(fila))
