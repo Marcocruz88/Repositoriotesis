@@ -9,17 +9,31 @@ from xgboost import XGBClassifier
 import plotly.graph_objects as go
 from dash.exceptions import PreventUpdate
 from dash import no_update, callback_context
+from unidecode import unidecode
 
 
 # Cargar datos
 Filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/Base analisis exploratorio sinnombre.csv"
 df = pd.read_csv(Filepath)
 
+df.columns = (
+    df.columns
+    .str.strip()
+    .str.lower()
+    .str.replace("á", "a")
+    .str.replace("é", "e")
+    .str.replace("í", "i")
+    .str.replace("ó", "o")
+    .str.replace("ú", "u")
+)
+
+print(df.columns.tolist())
 
 # Cargar columnas del modelo
 columns_filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/muestra dummies2.csv"
 df_columns = pd.read_csv(columns_filepath)
 columnas_modelo = df_columns.columns.tolist()
+df_columns.to_excel("debug_columnas.xlsx", index=False)
 
 # Cargar modelo
 modelo = XGBClassifier()
@@ -170,7 +184,7 @@ app.layout = dbc.Container([
             ], width=6),
             dbc.Col([
                 html.Label("Unidad de Contratación:"),
-                dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in df['nombre de la unidad de contratación'].dropna().unique()])
+                dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in df['nombre de la unidad de contratacion'].dropna().unique()])
             ], width=6)
         ], className="mb-2"),
 
@@ -226,11 +240,11 @@ app.layout = dbc.Container([
         dbc.Row([
             dbc.Col([
                 html.Label("¿Está Liquidado?"),
-                dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in df['liquidación'].dropna().unique()])
+                dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in df['liquidacion'].dropna().unique()])
             ], width=6),
             dbc.Col([
                 html.Label("Año de Publicación:"),
-                dcc.Dropdown(id="anio_publicacion", options=[{"label": i, "value": i} for i in sorted(df['año_publicacion'].dropna().unique())])
+                dcc.Dropdown(id="anio_publicacion", options=[{"label": i, "value": i} for i in sorted(df['ano_publicacion'].dropna().unique())])
             ], width=6)
         ], className="mb-2"),
 
@@ -453,7 +467,12 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         "duracion_proceso", "anio_publicacion", "porcentaje_pagado"
     ]
 
+
+
     datos_dict = dict(zip(nombres_inputs, inputs))
+    datos_dict_original = dict(zip(nombres_inputs, inputs))
+    # Reemplazar guiones bajos en las claves para que coincidan con columnas originales del modelo
+    datos_dict = {k.replace("_", " "): v for k, v in datos_dict.items()}
 
     # Validar que no haya campos vacíos
     if any(v is None or v == '' for v in datos_dict.values()):
@@ -485,20 +504,27 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
     # Ahora sí: convertir a dummies
 
     df_input.rename(columns={
-        "origen_recursos": "origen de los recursos",
+        "origen recursos": "origen de los recursos",
         "destino_gasto": "destino gasto",
         "estado_contrato": "estado contrato",
-        "codigo_categoria": "codigo de categoria principal",
+        "codigo categoria": "codigo de categoria principal",
         "departamento_proveedor": "departamento proveedor",
         "ciudad_proveedor": "ciudad proveedor",
         "fase": "fase",
-        "justificacion_modalidad": "justificacion modalidad de contratacion",
-        "modalidad_contratacion": "modalidad de contratacion",
-        "unidad_contratacion": "nombre de la unidad de contratación",
-        "tipo_contrato": "tipo de contrato"
+        "justificacion modalidad": "justificacion modalidad de contratacion",
+        "modalidad contratacion": "modalidad de contratacion",
+        "unidad contratacion": "nombre de la unidad de contratacion",
+        "tipo contrato": "tipo de contrato",
+        "puede prorrogar": "el contrato puede ser prorrogado",
+        "condiciones entrega": "condiciones de entrega",
+        "porcentaje pagado": "porcentaje_pagado"
     }, inplace=True)
 
+
+
+    df_input.to_excel("debug_original_individual2.xlsx", index=False)
     df_input_dummies = pd.get_dummies(df_input)
+    df_input_dummies.columns = [col.lower() for col in df_input_dummies.columns]
     df_input_dummies.to_excel("apenasdummies.xlsx", index=False)
 
     # Reindex para que tenga solo las columnas del modelo (asegura orden y consistencia)
@@ -512,12 +538,12 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         "precio base": "precio_base",
         "tiempo duracion (dias)": "tiempo_duracion",
         "duracion_proceso_dias": "duracion_proceso",
-        "año_publicacion": "anio_publicacion"  # ⬅️ este es clave por el tema de la tilde
+        "ano_publicacion": "anio_publicacion"  # ⬅️ este es clave por el tema de la tilde
     }
 
     for col_final, col_input in mapa_campos_numericos.items():
         if col_final in df_input_dummies.columns:
-            df_input_dummies.at[df_input_dummies.index[0], col_final] = datos_dict[col_input]
+            df_input_dummies.at[df_input_dummies.index[0], col_final] = datos_dict_original[col_input]
         
     df_input_dummies = df_input_dummies.astype(int)
     df_input_dummies.to_excel("debug_dummies_individual.xlsx", index=False)
@@ -607,12 +633,23 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
         return dbc.Alert("El archivo está vacío o no tiene columnas.", color="warning"), False, False
 
     try:
+
+        df.columns = df.columns.str.lower().str.strip()
+        df.columns = [unidecode(col) for col in df.columns]  
+        df = df.applymap(lambda x: unidecode(x.lower().strip()) if isinstance(x, str) else x)
+
+        #df = df.applymap(lambda x: x.lower().strip() if isinstance(x, str) else x)
         df_numeric = df.copy()
         for col in df_numeric.select_dtypes(include=['object']).columns:
             df_numeric[col] = df_numeric[col].astype(str)
 
-        df = df.applymap(lambda x: x.strip().title() if isinstance(x, str) else x)
+        if 'nit entidad' in df_numeric.columns:
+            df_numeric['nit entidad'] = df_numeric['nit entidad'].astype(str)
+
         df_dummies = pd.get_dummies(df_numeric)
+        df_dummies.columns = df_dummies.columns.str.lower().str.strip()
+        df_dummies.to_excel("masivogetdummies.xlsx", index=False)
+
         df_dummies = df_dummies.reindex(columns=columnas_modelo, fill_value=0)
         df_dummies = df_dummies.astype(int)
         df_dummies.to_excel("debug_dummies_masivo.xlsx", index=False)
