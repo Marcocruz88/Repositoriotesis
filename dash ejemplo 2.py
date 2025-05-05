@@ -27,13 +27,11 @@ df.columns = (
     .str.replace("ú", "u")
 )
 
-print(df.columns.tolist())
-
 # Cargar columnas del modelo
 columns_filepath = "C:/Users/user/OneDrive/Documentos/semestres uniandes/Clases 2025-1/Tesis IIND/Solo sector salud/muestra dummies2.csv"
 df_columns = pd.read_csv(columns_filepath)
 columnas_modelo = df_columns.columns.tolist()
-df_columns.to_excel("debug_columnas.xlsx", index=False)
+
 
 # Cargar modelo
 modelo = XGBClassifier()
@@ -397,12 +395,19 @@ def formatear_miles(value):
      Output("departamento_proveedor", "value"),
      Output("ciudad_proveedor", "value"),
      Output("anio_publicacion", "value"),
-     Output("porcentaje_pagado", "value")],
+     Output("porcentaje_pagado", "value"),
+     
+     # Añade estos 5
+     Output("valor_contrato", "value"),
+     Output("valor_pendiente", "value"),
+     Output("precio_base", "value"),
+     Output("tiempo_duracion", "value"),
+     Output("duracion_proceso", "value")],
     Input("boton-reiniciar-individual-tab1", "n_clicks"),
     prevent_initial_call=True
 )
-def reiniciar_dropdowns(n_clicks):
-    return [None] * 25
+def reiniciar_dropdowns_y_inputs(n_clicks):
+    return [None] * 25 + [""] * 5
 
 # Callback para ejecutar la predicción individual y mostrar mensaje de reinicio en la pestaña de resultados
 @app.callback(
@@ -500,7 +505,7 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
         if col not in campos_numericos and df_input[col].dtype == object:
             df_input[col] = df_input[col].astype(str).str.strip().str.title()
 
-    df_input.to_excel("debug_original_individual.xlsx", index=False)
+    
     # Ahora sí: convertir a dummies
 
     df_input.rename(columns={
@@ -522,14 +527,14 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
 
 
 
-    df_input.to_excel("debug_original_individual2.xlsx", index=False)
+    
     df_input_dummies = pd.get_dummies(df_input)
     df_input_dummies.columns = [col.lower() for col in df_input_dummies.columns]
-    df_input_dummies.to_excel("apenasdummies.xlsx", index=False)
+    
 
     # Reindex para que tenga solo las columnas del modelo (asegura orden y consistencia)
     df_input_dummies = df_input_dummies.reindex(columns=columnas_modelo, fill_value=0)
-    df_input_dummies.to_excel("apenasdummies2.xlsx", index=False)
+    
 
    # 🔁 Reinsertar valores numéricos reales después del reindex
     mapa_campos_numericos = {
@@ -546,7 +551,7 @@ def manejar_prediccion(n_clicks_predecir, n_clicks_reiniciar, *inputs):
             df_input_dummies.at[df_input_dummies.index[0], col_final] = datos_dict_original[col_input]
         
     df_input_dummies = df_input_dummies.astype(int)
-    df_input_dummies.to_excel("debug_dummies_individual.xlsx", index=False)
+   
 
     # Realizar predicción
     X_pred = df_input_dummies.values
@@ -648,11 +653,11 @@ def manejar_carga_y_reinicio(contents, n_clicks_reiniciar, filename):
 
         df_dummies = pd.get_dummies(df_numeric)
         df_dummies.columns = df_dummies.columns.str.lower().str.strip()
-        df_dummies.to_excel("masivogetdummies.xlsx", index=False)
+        
 
         df_dummies = df_dummies.reindex(columns=columnas_modelo, fill_value=0)
         df_dummies = df_dummies.astype(int)
-        df_dummies.to_excel("debug_dummies_masivo.xlsx", index=False)
+    
 
 
 
