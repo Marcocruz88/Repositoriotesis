@@ -50,9 +50,9 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col(
             dcc.Tabs(id="tabs", value="tab1", children=[
-    dcc.Tab(label="Entrada de Datos-Caso Individual", value="tab1"),
-    dcc.Tab(label="Resultados-Caso Individual", value="tab2"),
-    dcc.Tab(label="Revisión Excel- Caso Multiple", value="tab3")  
+    dcc.Tab(label="Entrada de Datos-Caso Individual", value="tab1", style={"color": "Black"},selected_style={"color": "black","fontWeight": "bold", "backgroundColor": "#ffc107"}),
+    dcc.Tab(label="Resultados-Caso Individual", value="tab2", style={"color": "Black"},selected_style={"color": "black","fontWeight": "bold", "backgroundColor": "#ffc107"}),
+    dcc.Tab(label="Revisión Excel- Caso Multiple", value="tab3", style={"color": "Black"},selected_style={"color": "black","fontWeight": "bold", "backgroundColor": "#ffc107"})  
 ]),
             width=12
         )
@@ -81,182 +81,182 @@ app.layout = dbc.Container([
         # Fila 1
         dbc.Row([
             dbc.Col([
-                html.Label("NIT Entidad:"),
+                html.Label("NIT Entidad:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="nit_entidad", options=[{"label": i, "value": i} for i in sorted(df['nit entidad'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Destino del Gasto:"),
+                html.Label("Destino del Gasto:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="destino_gasto", options=[{"label": i, "value": i} for i in sorted(df['destino gasto'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 2
         dbc.Row([
             dbc.Col([
-                html.Label("Departamento:"),
+                html.Label("Departamento:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="departamento", options=[{"label": i, "value": i} for i in sorted(df['departamento'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Valor del Contrato:"),
+                html.Label("Valor del Contrato:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Input(id="valor_contrato", type="number", debounce=True, style={"width": "100%"})
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 3
         dbc.Row([
             dbc.Col([
-                html.Label("Ciudad:"),
+                html.Label("Ciudad:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="ciudad", options=[{"label": i, "value": i} for i in sorted(df['ciudad'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Valor Pendiente de Pago:"),
+                html.Label("Valor Pendiente de Pago:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Input(id="valor_pendiente", type="text", debounce=True, style={"width": "100%"})
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 4
         dbc.Row([
             dbc.Col([
-                html.Label("Orden:"),
+                html.Label("Orden:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="orden", options=[{"label": i, "value": i} for i in sorted(df['orden'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Estado BPIN:"),
+                html.Label("Estado BPIN:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="estado_bpin", options=[{"label": i, "value": i} for i in sorted(df['estado bpin'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 5
         dbc.Row([
             dbc.Col([
-                html.Label("Rama:"),
+                html.Label("Rama:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="rama", options=[{"label": i, "value": i} for i in sorted(df['rama'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Año BPIN:"),
+                html.Label("Año BPIN:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="anno_bpin", options=[{"label": i, "value": i} for i in sorted(df['anno bpin'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 6
         dbc.Row([
             dbc.Col([
-                html.Label("Entidad Centralizada:"),
+                html.Label("Entidad Centralizada:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="entidad_centralizada", options=[{"label": i, "value": i} for i in sorted(df['entidad centralizada'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("¿Contrato Prorrogable?"),
+                html.Label("¿Contrato Prorrogable?", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="puede_prorrogar", options=[{"label": i, "value": i} for i in sorted(df['el contrato puede ser prorrogado'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 7
         dbc.Row([
             dbc.Col([
-                html.Label("Estado Contrato:"),
+                html.Label("Estado Contrato:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="estado_contrato", options=[{"label": i, "value": i} for i in sorted(df['estado contrato'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Fase:"),
+                html.Label("Fase:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="fase", options=[{"label": i, "value": i} for i in sorted(df['fase'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 8
         dbc.Row([
             dbc.Col([
-                html.Label("Código de Categoría Principal:"),
+                html.Label("Código de Categoría Principal:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="codigo_categoria", options=[{"label": i, "value": i} for i in sorted(df['codigo de categoria principal'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Precio Base:"),
+                html.Label("Precio Base:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Input(id="precio_base", type="text", debounce=True, style={"width": "100%"})
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 9
         dbc.Row([
             dbc.Col([
-                html.Label("Tipo de Contrato:"),
+                html.Label("Tipo de Contrato:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="tipo_contrato", options=[{"label": i, "value": i} for i in sorted(df['tipo de contrato'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Unidad de Contratación:"),
+                html.Label("Unidad de Contratación:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="unidad_contratacion", options=[{"label": i, "value": i} for i in sorted(df['nombre de la unidad de contratacion'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 10
         dbc.Row([
             dbc.Col([
-                html.Label("Modalidad de Contratación:"),
+                html.Label("Modalidad de Contratación:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="modalidad_contratacion", options=[{"label": i, "value": i} for i in sorted(df['modalidad de contratacion'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Departamento Proveedor:"),
+                html.Label("Departamento Proveedor:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="departamento_proveedor", options=[{"label": i, "value": i} for i in sorted(df['departamento proveedor'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 11
         dbc.Row([
             dbc.Col([
-                html.Label("Justificación Modalidad de Contratación:"),
+                html.Label("Justificación Modalidad de Contratación:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="justificacion_modalidad", options=[{"label": i, "value": i} for i in sorted(df['justificacion modalidad de contratacion'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Ciudad Proveedor:"),
+                html.Label("Ciudad Proveedor:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="ciudad_proveedor", options=[{"label": i, "value": i} for i in sorted(df['ciudad proveedor'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 12
         dbc.Row([
             dbc.Col([
-                html.Label("Condiciones de Entrega:"),
+                html.Label("Condiciones de Entrega:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="condiciones_entrega", options=[{"label": i, "value": i} for i in sorted(df['condiciones de entrega'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Tiempo de Duración (días):"),
+                html.Label("Tiempo de Duración (días):", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Input(id="tiempo_duracion", type="text", debounce=True, style={"width": "100%"})
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 13
         dbc.Row([
             dbc.Col([
-                html.Label("¿Es Pyme?"),
+                html.Label("¿Es Pyme?", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="es_pyme", options=[{"label": i, "value": i} for i in sorted(df['es pyme'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Duración del Proceso (días):"),
+                html.Label("Duración del Proceso (días):", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Input(id="duracion_proceso", type="text", debounce=True, style={"width": "100%"})
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 14
         dbc.Row([
             dbc.Col([
-                html.Label("¿Está Liquidado?"),
+                html.Label("¿Está Liquidado?", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="liquidacion", options=[{"label": i, "value": i} for i in sorted(df['liquidacion'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Año de Publicación:"),
+                html.Label("Año de Publicación:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="anio_publicacion", options=[{"label": i, "value": i} for i in sorted(df['ano_publicacion'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2"),
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"}),
 
         # Fila 15
         dbc.Row([
             dbc.Col([
-                html.Label("Origen de los Recursos:"),
+                html.Label("Origen de los Recursos:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="origen_recursos", options=[{"label": i, "value": i} for i in sorted(df['origen de los recursos'].dropna().unique())])
-            ], width=6),
+            ], width=4),
             dbc.Col([
-                html.Label("Porcentaje Pagado:"),
+                html.Label("Porcentaje Pagado:", style={"color": "white", "fontWeight": "bold", "fontSize": "20px"}),
                 dcc.Dropdown(id="porcentaje_pagado", options=[{"label": i, "value": i} for i in sorted(df['porcentaje_pagado'].dropna().unique())])
-            ], width=6)
-        ], className="mb-2")
+            ], width=4)
+        ], className="mb-2",style={"justifyContent": "center"})
 
     ]),
 
