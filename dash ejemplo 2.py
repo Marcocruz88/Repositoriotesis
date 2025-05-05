@@ -314,7 +314,7 @@ app.layout = dbc.Container([
             color="success",
             className="text-center",
             is_open=False,
-            dismissable=True
+            dismissable=False
         ),
     ]),
 
